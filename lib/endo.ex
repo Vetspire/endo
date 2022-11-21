@@ -8,14 +8,12 @@ defmodule Endo do
   """
   @spec list_tables(repo :: module(), filters :: Keyword.t()) :: [Endo.Table.t()]
   def list_tables(repo, filters \\ []) do
-    unless function_exported?(repo, :config, 0) do
+    unless function_exported?(repo, :__adapter__, 0) do
       raise ArgumentError,
         message: "Expected a module that `use`-es `Ecto.Repo`, got: `#{inspect(repo)}`"
     end
 
-    repo.config
-    |> Keyword.get(:adapter)
-    |> list_tables(repo, filters)
+    list_tables(repo.__adapter__(), repo, filters)
   end
 
   defp list_tables(Ecto.Adapters.Postgres, repo, filters) do

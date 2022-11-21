@@ -50,6 +50,11 @@ defmodule Endo.Adapters.Postgres.Table do
   end
 
   @impl Endo.Queryable
+  def base_query do
+    from(x in __MODULE__, as: :self, where: x.table_schema == "public")
+  end
+
+  @impl Endo.Queryable
   def query(base_query \\ base_query(), filters) do
     Enum.reduce(filters, base_query, fn
       {:with_column, column_name}, query ->
