@@ -57,9 +57,13 @@ defmodule Endo.MixProject do
   defp deps do
     [
       # Endo's actual dependencies
-      {:ecto_sql, "~> 3.6"},
       {:jason, "~> 1.1"},
-      {:postgrex, "~> 0.15"},
+      {:ecto, "~> 3.6"},
+
+      # Adapter Dependencies, should be supplied by host app but these
+      # are nice to have for tests.
+      {:postgrex, "~> 0.15", only: :test},
+      {:ecto_sql, "~> 3.6", only: :test},
 
       # Runtime dependencies for tests / linting
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
