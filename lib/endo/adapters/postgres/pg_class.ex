@@ -77,7 +77,7 @@ defmodule Endo.Adapters.Postgres.PgClass do
           on: pg_attribute.attrelid == self.oid,
           as: :pg_attribute,
           where: pg_attribute.attnum in pg_index.indkey,
-          group_by: [self.relname, pg_class.relname],
+          group_by: [self.oid, self.relname, pg_class.relname],
           select: %{
             __struct__: Index,
             name: pg_class.relname,
@@ -88,7 +88,7 @@ defmodule Endo.Adapters.Postgres.PgClass do
       {:having_index, column}, query ->
         columns = (is_list(column) && column) || [column]
 
-        from([self: self, pg_attribute: pg_attribute] in query,
+        from([self: self, pg_attribute: pg_attribute] in Ecto.Query.exclude(query, :select),
           having: ^columns == fragment("ARRAY_AGG(?)", pg_attribute.attname)
         )
 

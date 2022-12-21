@@ -57,6 +57,7 @@ defmodule Endo.Adapters.Postgres.TableConstraint do
           where: self.constraint_type == "FOREIGN KEY"
         )
 
+      # coveralls-ignore-start
       {field, value}, query ->
         apply_filter(query, field, value)
     end)

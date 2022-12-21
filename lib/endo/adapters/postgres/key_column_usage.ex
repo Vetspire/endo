@@ -1,6 +1,5 @@
 defmodule Endo.Adapters.Postgres.KeyColumnUsage do
   @moduledoc false
-
   use Ecto.Schema
   use Endo.Queryable
 
@@ -8,6 +7,14 @@ defmodule Endo.Adapters.Postgres.KeyColumnUsage do
   alias Endo.Adapters.Postgres.TableConstraint
 
   @type t :: %__MODULE__{}
+
+  # TODO: This table can be used in tandem with our existing index lookup logic
+  #       to determine table constraints, whether or not indexes are unique, etc
+  #
+  #       This mapping currently exists and works, but isn't exposed by `Endo`'s
+  #       top level structs, or queries. Thus we'll ignore it for the time being.
+  #
+  # coveralls-ignore-start
 
   @schema_prefix "information_schema"
   @foreign_key_type :string
