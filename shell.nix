@@ -15,4 +15,8 @@ mkShell {
     pkgs.inotify-tools
     pkgs.docker-compose
   ];
+
+  POSTGRES_USER = "postgres";
+  POSTGRES_PASSWORD = "postgres";
+  POSTGRES_DB = "endo_repo";
 }
