@@ -16,6 +16,7 @@ mkShell {
     pkgs.docker-compose
   ];
 
+  POSTGRES_PORT="5432";
   POSTGRES_USER = "postgres";
   POSTGRES_PASSWORD = "postgres";
   POSTGRES_DB = "endo_repo";
