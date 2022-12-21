@@ -1,5 +1,5 @@
 defmodule Endo.Association do
-  @moduledoc false
+  @moduledoc "Association metadata for a given table's associations"
   @type t :: %__MODULE__{}
   defstruct [:adapter, :name, :type]
 end
