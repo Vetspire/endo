@@ -1,5 +1,13 @@
 defmodule Endo.Adapters.Postgres do
-  @moduledoc false
+  @moduledoc """
+  Adapter module implementing the ability for Endo to reflect upon any
+  Postgres-based Ecto Repo.
+
+  See `Endo` documentation for list of features.
+
+  In future, parts of `Endo`'s top level documentation may be moved here, but as
+  this is the only supported adapter at the time of writing, this isn't the case.
+  """
 
   @behaviour Endo.Adapter
 
