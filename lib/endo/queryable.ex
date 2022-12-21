@@ -1,5 +1,6 @@
 defmodule Endo.Queryable do
   @moduledoc false
+  # coveralls-ignore-start
 
   import Ecto.Query
 
