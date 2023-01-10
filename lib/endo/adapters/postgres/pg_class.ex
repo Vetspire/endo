@@ -77,11 +77,12 @@ defmodule Endo.Adapters.Postgres.PgClass do
           on: pg_attribute.attrelid == self.oid,
           as: :pg_attribute,
           where: pg_attribute.attnum in pg_index.indkey,
-          group_by: [self.oid, self.relname, pg_class.relname],
+          group_by: [self.oid, self.relname, pg_class.relname, pg_index.indexrelid],
           select: %{
             __struct__: Index,
             name: pg_class.relname,
-            columns: fragment("ARRAY_AGG(?)", pg_attribute.attname)
+            columns: fragment("ARRAY_AGG(?)", pg_attribute.attname),
+            pg_index: pg_index
           }
         )
 

@@ -14,6 +14,7 @@ defmodule Endo.Adapters.Postgres do
   alias Endo.Adapters.Postgres.Column
   alias Endo.Adapters.Postgres.Index
   alias Endo.Adapters.Postgres.PgClass
+  alias Endo.Adapters.Postgres.PgIndex
   alias Endo.Adapters.Postgres.Table
   alias Endo.Adapters.Postgres.TableConstraint
 
@@ -68,10 +69,14 @@ defmodule Endo.Adapters.Postgres do
   end
 
   def to_endo(%Index{} = index) do
+    metadata = index.pg_index || %PgIndex{}
+
     %Endo.Index{
       adapter: __MODULE__,
       name: index.name,
-      columns: index.columns
+      columns: index.columns,
+      is_primary: metadata.indisprimary,
+      is_unique: metadata.indisunique
     }
   end
 end
