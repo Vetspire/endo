@@ -242,5 +242,23 @@ defmodule EndoTest do
       refute is_nil(ctx.find.(tables, "accounts"))
       refute is_nil(ctx.find.(tables, "orgs"))
     end
+
+    test "index metadata contains flags `is_unique` and `is_primary`", ctx do
+      assert tables = Endo.list_tables(Test.Postgres.Repo)
+
+      assert %Endo.Table{} = accounts = ctx.find.(tables, "accounts")
+
+      # Account IDs are both unique and also the primary key of the table
+      assert %{is_primary: true, is_unique: true} =
+               Enum.find(accounts.indexes, &(&1.columns == ["id"]))
+
+      # Account emails are unique, but not the primary key of the table
+      assert %{is_primary: false, is_unique: true} =
+               Enum.find(accounts.indexes, &(&1.columns == ["email"]))
+
+      # Account timestamps are neither unique nor the primary key of the table
+      assert %{is_primary: false, is_unique: false} =
+               Enum.find(accounts.indexes, &(&1.columns == ["updated_at"]))
+    end
   end
 end

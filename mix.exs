@@ -44,6 +44,9 @@ defmodule Endo.MixProject do
 
   defp description() do
     """
+    Endo is a library containing database schema reflection APIs for your applications, as
+    well as implementations of queryable schemas to facilitate custom database reflection
+    via Ecto.
     """
   end
 
