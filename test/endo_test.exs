@@ -27,6 +27,37 @@ defmodule EndoTest do
     end
   end
 
+  describe "get_table/3" do
+    test "returns error when given non-ecto repo" do
+      assert_raise(
+        ArgumentError,
+        "Expected a module that `use`-es `Ecto.Repo`, got: `Enum`",
+        fn -> Endo.get_table(Enum, "users") end
+      )
+    end
+
+    test "returns error when given ecto repo, but unsupported adapter" do
+      assert_raise(
+        ArgumentError,
+        """
+        Unsupported adapter given. Supported adapters are currently: [Ecto.Adapters.Postgres].
+        Given: :test_adapter
+        """,
+        fn -> Endo.get_table(Test.BadRepo, "users") end
+      )
+    end
+  end
+
+  describe "get_table/3 (Postgres)" do
+    test "given valid table name and repo, returns Endo Table" do
+      assert %Endo.Table{name: "orgs"} = Endo.get_table(Test.Postgres.Repo, "orgs")
+    end
+
+    test "given invalid table name, but valid repo, returns nil" do
+      assert is_nil(Endo.get_table(Test.Postgres.Repo, "passports"))
+    end
+  end
+
   describe "list_tables/2 (Postgres)" do
     test "lists tables and metadata when given valid repo", ctx do
       assert tables = Endo.list_tables(Test.Postgres.Repo)
@@ -268,15 +299,15 @@ defmodule EndoTest do
     end
 
     test "given single Endo Table, loads but sets schemas to empty list if it has no schema impl." do
-      assert [%Endo.Table{schemas: %Endo.Schema.NotLoaded{}} = accounts] =
-               Endo.list_tables(Test.Postgres.Repo, table_name: "accounts")
+      assert %Endo.Table{schemas: %Endo.Schema.NotLoaded{}} =
+               accounts = Endo.get_table(Test.Postgres.Repo, "accounts")
 
       assert %Endo.Table{schemas: []} = Endo.load_schemas(accounts)
     end
 
     test "given single Endo Table, loads schemas where they exist" do
-      assert [%Endo.Table{schemas: %Endo.Schema.NotLoaded{}} = orgs] =
-               Endo.list_tables(Test.Postgres.Repo, table_name: "orgs")
+      assert %Endo.Table{schemas: %Endo.Schema.NotLoaded{}} =
+               orgs = Endo.get_table(Test.Postgres.Repo, "orgs")
 
       assert %Endo.Table{schemas: [Test.Postgres.Org]} = Endo.load_schemas(orgs)
     end
