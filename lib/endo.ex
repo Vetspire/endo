@@ -97,6 +97,25 @@ defmodule Endo do
   alias Endo.Adapters.Postgres
 
   @doc """
+  Given an Ecto Repo and a table name, tries to return an Endo Table or nil if said table does
+  not exist.
+
+  Internally delegates to `list_tables/2` with the `table_name` option set.
+  See `list_tables/2` for more information.
+  """
+  @spec get_table(repo :: module(), table_name :: String.t(), filters :: Keyword.t()) ::
+          Endo.Table.t() | nil
+  def get_table(repo, table_name, filters \\ []) when is_binary(table_name) do
+    case list_tables(repo, Keyword.put(filters, :table_name, table_name)) do
+      [%Endo.Table{} = endo_table] ->
+        endo_table
+
+      [] ->
+        nil
+    end
+  end
+
+  @doc """
   Given an Ecto Repo, returns a list of all tables, columns, associations, and indexes.
   Takes an optional keyword list of filters which filter said tables down to given constraints.
   """
