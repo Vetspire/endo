@@ -111,9 +111,9 @@ defmodule Endo do
   end
 
   defp list_tables(Ecto.Adapters.Postgres, repo, filters) do
-    repo
-    |> Postgres.list_tables(filters)
-    |> Enum.map(&Postgres.to_endo/1)
+    for table <- Postgres.list_tables(repo, filters) do
+      Postgres.to_endo(table, repo.config())
+    end
   end
 
   defp list_tables(adapter, _repo, _filters) do
