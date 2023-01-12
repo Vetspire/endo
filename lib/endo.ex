@@ -123,4 +123,12 @@ defmodule Endo do
       Given: #{inspect(adapter)}
       """
   end
+
+  @doc """
+  Given a list of Endo Tables or a single Endo Table, tries to load the application-specific Ecto Schemas
+  See `Endo.Schema.load/1` for more information.
+  """
+  @spec load_schemas(Endo.Table.t()) :: Endo.Table.t()
+  @spec load_schemas([Endo.Table.t()]) :: [Endo.Table.t()]
+  defdelegate load_schemas(endo_table_or_tables), to: Endo.Schema, as: :load
 end
