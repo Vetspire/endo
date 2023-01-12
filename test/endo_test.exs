@@ -261,4 +261,41 @@ defmodule EndoTest do
                Enum.find(accounts.indexes, &(&1.columns == ["updated_at"]))
     end
   end
+
+  describe "load_tables/1" do
+    test "given a list that contains data other than Endo Tables, raises" do
+      assert_raise(ArgumentError, fn -> Endo.load_schemas([%Endo.Table{}, 123]) end)
+    end
+
+    test "given single Endo Table, loads but sets schemas to empty list if it has no schema impl." do
+      assert [%Endo.Table{schemas: %Endo.Schema.NotLoaded{}} = accounts] =
+               Endo.list_tables(Test.Postgres.Repo, table_name: "accounts")
+
+      assert %Endo.Table{schemas: []} = Endo.load_schemas(accounts)
+    end
+
+    test "given single Endo Table, loads schemas where they exist" do
+      assert [%Endo.Table{schemas: %Endo.Schema.NotLoaded{}} = orgs] =
+               Endo.list_tables(Test.Postgres.Repo, table_name: "orgs")
+
+      assert %Endo.Table{schemas: [Test.Postgres.Org]} = Endo.load_schemas(orgs)
+    end
+
+    test "loads the corresponding Ecto Schemas of all tables in list" do
+      assert tables = Endo.list_tables(Test.Postgres.Repo)
+      assert Enum.all?(tables, &is_struct(&1.schemas, Endo.Schema.NotLoaded))
+
+      assert tables = Endo.load_schemas(tables)
+      refute Enum.all?(tables, &is_struct(&1.schemas, Endo.Schema.NotLoaded))
+
+      # Only the `orgs` table has a corresponding schema, all others are nil
+      for table <- tables do
+        if table.name == "orgs" do
+          assert table.schemas == [Test.Postgres.Org]
+        else
+          assert table.schemas == []
+        end
+      end
+    end
+  end
 end

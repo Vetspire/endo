@@ -34,17 +34,23 @@ defmodule Endo.Adapters.Postgres do
     |> Enum.map(fn {:ok, %Table{} = table} -> table end)
   end
 
-  @spec to_endo(Table.t()) :: Endo.Table.t()
-  @spec to_endo(TableConstraint.t()) :: Endo.Association.t()
-  @spec to_endo(Column.t()) :: Endo.Column.t()
-  @spec to_endo(Index.t()) :: Endo.Index.t()
+  @spec to_endo(Table.t(), Keyword.t()) :: Endo.Table.t()
+  @spec to_endo(TableConstraint.t(), Keyword.t()) :: Endo.Association.t()
+  @spec to_endo(Column.t(), Keyword.t()) :: Endo.Column.t()
+  @spec to_endo(Index.t(), Keyword.t()) :: Endo.Index.t()
 
-  def to_endo(%Table{} = table) do
+  def to_endo(entity, config \\ [])
+
+  def to_endo(%Table{} = table, config) do
     %Endo.Table{
       adapter: __MODULE__,
       name: table.table_name,
       columns: Enum.map(table.columns, &to_endo/1),
       indexes: Enum.map(table.indexes, &to_endo/1),
+      schemas: %Endo.Schema.NotLoaded{
+        table: table.table_name,
+        otp_app: Keyword.get(config, :otp_app)
+      },
       associations:
         table.table_constraints
         |> Enum.filter(&(&1.constraint_type == "FOREIGN KEY"))
@@ -52,7 +58,7 @@ defmodule Endo.Adapters.Postgres do
     }
   end
 
-  def to_endo(%Column{} = column) do
+  def to_endo(%Column{} = column, _config) do
     %Endo.Column{
       adapter: __MODULE__,
       name: column.column_name,
@@ -60,7 +66,7 @@ defmodule Endo.Adapters.Postgres do
     }
   end
 
-  def to_endo(%TableConstraint{} = constraint) do
+  def to_endo(%TableConstraint{} = constraint, _config) do
     %Endo.Association{
       adapter: __MODULE__,
       name: constraint.constraint_name,
@@ -68,7 +74,7 @@ defmodule Endo.Adapters.Postgres do
     }
   end
 
-  def to_endo(%Index{} = index) do
+  def to_endo(%Index{} = index, _config) do
     metadata = index.pg_index || %PgIndex{}
 
     %Endo.Index{
