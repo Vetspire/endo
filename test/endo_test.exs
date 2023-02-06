@@ -98,18 +98,36 @@ defmodule EndoTest do
       # Association metadata is also surfaced:
       assert Enum.count(accounts_orgs.associations) == 2
 
-      assert %Endo.Association{name: "accounts_orgs_account_id_fkey", type: "accounts"} =
-               ctx.find.(accounts_orgs.associations, "accounts_orgs_account_id_fkey")
+      assert %Endo.Association{
+               name: "accounts_orgs_account_id_fkey",
+               type: "accounts",
+               from_table_name: "accounts_orgs",
+               to_table_name: "accounts",
+               from_column_name: "account_id",
+               to_column_name: "id"
+             } = ctx.find.(accounts_orgs.associations, "accounts_orgs_account_id_fkey")
 
-      assert %Endo.Association{name: "accounts_orgs_org_id_fkey", type: "orgs"} =
-               ctx.find.(accounts_orgs.associations, "accounts_orgs_org_id_fkey")
+      assert %Endo.Association{
+               name: "accounts_orgs_org_id_fkey",
+               type: "orgs",
+               from_table_name: "accounts_orgs",
+               to_table_name: "orgs",
+               from_column_name: "org_id",
+               to_column_name: "id"
+             } = ctx.find.(accounts_orgs.associations, "accounts_orgs_org_id_fkey")
 
       # Of course, individual tables might represent a many-to-one association. This likewise is
       # surfaced:
       assert Enum.count(repos.associations) == 1
 
-      assert %Endo.Association{name: "repos_account_id_fkey", type: "accounts"} =
-               ctx.find.(repos.associations, "repos_account_id_fkey")
+      assert %Endo.Association{
+               name: "repos_account_id_fkey",
+               type: "accounts",
+               from_table_name: "repos",
+               to_table_name: "accounts",
+               from_column_name: "account_id",
+               to_column_name: "id"
+             } = ctx.find.(repos.associations, "repos_account_id_fkey")
     end
 
     test "lists tables and metadata for all tables with column" do
