@@ -20,7 +20,7 @@ defmodule Endo.Adapters.Postgres do
 
   @spec list_tables(repo :: module(), opts :: Keyword.t()) :: [Table.t()]
   def list_tables(repo, opts \\ []) when is_atom(repo) do
-    preloads = [:columns, table_constraints: :constraint_column_usage]
+    preloads = [:columns, table_constraints: [:key_column_usage, :constraint_column_usage]]
 
     preload_indexes = fn %Table{table_name: name} = table ->
       indexes = PgClass.query(collate_indexes: true, relname: name)
@@ -70,7 +70,11 @@ defmodule Endo.Adapters.Postgres do
     %Endo.Association{
       adapter: __MODULE__,
       name: constraint.constraint_name,
-      type: constraint.constraint_column_usage.table_name
+      type: constraint.constraint_column_usage.table_name,
+      from_table_name: constraint.key_column_usage.table_name,
+      to_table_name: constraint.constraint_column_usage.table_name,
+      from_column_name: constraint.key_column_usage.column_name,
+      to_column_name: constraint.constraint_column_usage.column_name
     }
   end
 
