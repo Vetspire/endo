@@ -13,6 +13,7 @@ defmodule Endo.Adapters.Postgres do
 
   alias Endo.Adapters.Postgres.Column
   alias Endo.Adapters.Postgres.Index
+  alias Endo.Adapters.Postgres.Metadata
   alias Endo.Adapters.Postgres.PgClass
   alias Endo.Adapters.Postgres.PgIndex
   alias Endo.Adapters.Postgres.Table
@@ -22,15 +23,17 @@ defmodule Endo.Adapters.Postgres do
   def list_tables(repo, opts \\ []) when is_atom(repo) do
     preloads = [:columns, table_constraints: [:key_column_usage, :constraint_column_usage]]
 
-    preload_indexes = fn %Table{table_name: name} = table ->
+    derive_preloads = fn %Table{table_name: name} = table ->
       indexes = PgClass.query(collate_indexes: true, relname: name)
-      %Table{table | indexes: repo.all(indexes)}
+      metadata = PgClass.query(relname: name, relkind: ~w(r t m f p))
+
+      %Table{table | pg_class: repo.one(metadata), indexes: repo.all(indexes)}
     end
 
     opts
     |> Table.query()
     |> repo.all()
-    |> Task.async_stream(&(&1 |> repo.preload(preloads) |> preload_indexes.()))
+    |> Task.async_stream(&(&1 |> repo.preload(preloads) |> derive_preloads.()))
     |> Enum.map(fn {:ok, %Table{} = table} -> table end)
   end
 
@@ -54,7 +57,8 @@ defmodule Endo.Adapters.Postgres do
       associations:
         table.table_constraints
         |> Enum.filter(&(&1.constraint_type == "FOREIGN KEY"))
-        |> Enum.map(&to_endo/1)
+        |> Enum.map(&to_endo/1),
+      metadata: Metadata.derive!(table)
     }
   end
 
