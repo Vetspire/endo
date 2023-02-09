@@ -92,6 +92,34 @@ defmodule Endo do
   # Returns list of tables defining a *compound index* on `(org_id, location_id, patient_id)`
   # Tables containing the same index in a different order, or a partial match will not be returned.
   ```
+
+  ## Adapter-specific metadata
+
+  While Endo is designed to be able to adapt and connect to several different database backends, it is known that
+  certain features are very much database-engine specific.
+
+  As a result of this, each `Endo.Table.t()` also surfaces potentially adapter-specific metadata by way of its
+  `metadata` key.
+
+  A piece of `metadata` will be of type `Endo.Metadata.Postgres.t()` if it surfaces from the `Endo.Adapters.Postgres`
+  adapter for example. Said metadata will thus be tailored to the underlying repo database engine.
+
+  This information is useful if one wants to build CI checks and other features on a lower level; i.e. writing
+  a check that enforces all tables in your application which don't have a primary key has `REPLICA IDENTITY FULL` set
+  to enable Postgres to replicate to read replicas correctly.
+
+  See below for an example of such a check:
+
+  ```elixir
+  [] =
+    Repo
+    |> Endo.list_tables()
+    |> Enum.reject(&Enum.any?(&1.indexes, fn index -> index.is_primary end))
+    |> Enum.reject(&(&1.metadata.replica_identity == "FULL"))
+  ```
+
+  As features get built out, we make no hard guarantees of keeping the `metadata` field stable, but efforts will
+  of course be taken to mitigate unnecessary breaking changes from occuring.
   """
 
   alias Endo.Adapters.Postgres
