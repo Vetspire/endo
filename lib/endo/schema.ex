@@ -5,8 +5,6 @@ defmodule Endo.Schema do
     @moduledoc false
 
     @type t :: %__MODULE__{}
-
-    @enforce_keys [:table]
     defstruct [:table, :otp_app]
   end
 
