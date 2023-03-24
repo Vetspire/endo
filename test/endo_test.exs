@@ -314,6 +314,16 @@ defmodule EndoTest do
       assert tables = Endo.list_tables(Test.Postgres.Repo)
 
       for table <- tables, size <- [:table_size, :relation_size, :toast_size, :index_size] do
+        assert is_integer(Map.get(table.metadata, size))
+      end
+
+      for table <- tables,
+          size <- [
+            :table_size_pretty,
+            :relation_size_pretty,
+            :toast_size_pretty,
+            :index_size_pretty
+          ] do
         # Actual values are, of course, dynamic based on the size of the table.
         # Just assert that we get the number of kilobytes or bytes returned and trust that
         # this scales up into the gigabytes and such accordingly.
