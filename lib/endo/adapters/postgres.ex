@@ -22,7 +22,6 @@ defmodule Endo.Adapters.Postgres do
 
   @spec list_tables(repo :: module(), opts :: Keyword.t()) :: [Table.t()]
   def list_tables(repo, opts \\ []) when is_atom(repo) do
-    import Ecto.Query
     preloads = [:columns, table_constraints: [:key_column_usage, :constraint_column_usage]]
 
     derive_preloads = fn %Table{table_name: name} = table ->
