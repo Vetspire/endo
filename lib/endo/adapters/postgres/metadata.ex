@@ -17,7 +17,11 @@ defmodule Endo.Adapters.Postgres.Metadata do
       table_size: size.table_size,
       relation_size: size.relation_size,
       toast_size: size.toast_size,
-      index_size: size.index_size
+      index_size: size.index_size,
+      table_size_pretty: size.table_size_pretty,
+      relation_size_pretty: size.relation_size_pretty,
+      toast_size_pretty: size.toast_size_pretty,
+      index_size_pretty: size.index_size_pretty
     }
   end
 

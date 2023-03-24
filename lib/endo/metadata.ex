@@ -20,7 +20,11 @@ defmodule Endo.Metadata do
       :table_size,
       :relation_size,
       :index_size,
-      :toast_size
+      :toast_size,
+      :table_size_pretty,
+      :relation_size_pretty,
+      :index_size_pretty,
+      :toast_size_pretty
     ]
   end
 end
