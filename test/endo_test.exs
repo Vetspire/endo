@@ -311,7 +311,9 @@ defmodule EndoTest do
     end
 
     test "size metadata is returned alongside fetching tables" do
-      assert tables = Endo.list_tables(Test.Postgres.Repo)
+      assert tables =
+               Endo.list_tables(Test.Postgres.Repo)
+               |> IO.inspect()
 
       for table <- tables, size <- [:table_size, :relation_size, :toast_size, :index_size] do
         assert is_integer(Map.get(table.metadata, size))
