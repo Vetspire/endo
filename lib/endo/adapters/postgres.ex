@@ -16,18 +16,26 @@ defmodule Endo.Adapters.Postgres do
   alias Endo.Adapters.Postgres.Metadata
   alias Endo.Adapters.Postgres.PgClass
   alias Endo.Adapters.Postgres.PgIndex
+  alias Endo.Adapters.Postgres.Size
   alias Endo.Adapters.Postgres.Table
   alias Endo.Adapters.Postgres.TableConstraint
 
   @spec list_tables(repo :: module(), opts :: Keyword.t()) :: [Table.t()]
   def list_tables(repo, opts \\ []) when is_atom(repo) do
+    import Ecto.Query
     preloads = [:columns, table_constraints: [:key_column_usage, :constraint_column_usage]]
 
     derive_preloads = fn %Table{table_name: name} = table ->
       indexes = PgClass.query(collate_indexes: true, relname: name)
       metadata = PgClass.query(relname: name, relkind: ~w(r t m f p))
+      size = Size.query(relname: name)
 
-      %Table{table | pg_class: repo.one(metadata), indexes: repo.all(indexes)}
+      %Table{
+        table
+        | size: repo.one(size),
+          pg_class: repo.one(metadata),
+          indexes: repo.all(indexes)
+      }
     end
 
     opts

@@ -309,6 +309,18 @@ defmodule EndoTest do
       assert %{is_primary: false, is_unique: false} =
                Enum.find(accounts.indexes, &(&1.columns == ["updated_at"]))
     end
+
+    test "size metadata is returned alongside fetching tables" do
+      assert tables = Endo.list_tables(Test.Postgres.Repo)
+
+      for table <- tables, size <- [:table_size, :relation_size, :toast_size, :index_size] do
+        # Actual values are, of course, dynamic based on the size of the table.
+        # Just assert that we get the number of kilobytes or bytes returned and trust that
+        # this scales up into the gigabytes and such accordingly.
+        value = Map.get(table.metadata, size)
+        assert value =~ "bytes" or value =~ "kB"
+      end
+    end
   end
 
   describe "load_tables/1" do

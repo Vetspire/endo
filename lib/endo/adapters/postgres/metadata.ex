@@ -6,14 +6,18 @@ defmodule Endo.Adapters.Postgres.Metadata do
   alias Endo.Adapters.Postgres.Table
 
   @spec derive!(Table.t()) :: Endo.Metadata.Postgres.t()
-  def derive!(%Table{pg_class: pg_class}) do
+  def derive!(%Table{pg_class: pg_class, size: size}) do
     %Endo.Metadata.Postgres{
       replica_identity: replica_identity(pg_class),
       kind: kind(pg_class),
       has_triggers: pg_class.relhastriggers,
       is_populated: pg_class.relispopulated,
       is_partitioned: pg_class.relispartition,
-      pg_class: pg_class
+      pg_class: pg_class,
+      table_size: size.table_size,
+      relation_size: size.relation_size,
+      toast_size: size.toast_size,
+      index_size: size.index_size
     }
   end
 
