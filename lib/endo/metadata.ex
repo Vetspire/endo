@@ -16,7 +16,11 @@ defmodule Endo.Metadata do
       :has_triggers,
       :is_populated,
       :is_partitioned,
-      :pg_class
+      :pg_class,
+      :table_size,
+      :relation_size,
+      :index_size,
+      :toast_size
     ]
   end
 end
