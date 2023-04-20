@@ -60,6 +60,11 @@ defmodule Endo do
     components and order.
   - `without_index`, instructs Endo to only return tables without indexes on the given column or columns.
     Likewise, compound indexes must exactly match the given ones components and order.
+  - `with_index_covering`, instructs Endo to only return tables with an index which covers the given
+    column(s). An index covering a given column(s) is defined as whether or not there exists a single index
+    or composite index which contains the given column(s) regardless of ordering.
+  - `without_index_covering`, instructs Endo to only return tables without an index which covers the given
+    column(s). The same caveats as the above option apply.
 
   Additionally, adapters are free to implement custom filters. The `Endo.Adapters.Postgres` adapter
   forwards any filters not matching the above list directly to direct SQL queries against the base
@@ -89,8 +94,13 @@ defmodule Endo do
   # Returns list of tables defining a relation to `cars`, without an index on said column
 
   Endo.list_tables(MyApp.Repo, with_index: ["org_id", "location_id", "patient_id"])
-  # Returns list of tables defining a *compound index* on `(org_id, location_id, patient_id)`
+  # Returns list of tables defining a *composite index* on `(org_id, location_id, patient_id)`
   # Tables containing the same index in a different order, or a partial match will not be returned.
+
+  Endo.list_tables(MyApp.Repo, with_index_covering: "org_id")
+  # Returns list of tables defining any index which includes `org_id` (exact matches, or there exists
+  # some composite index where `org_id` is a member).
+  # Ordering does not matter.
   ```
 
   ## Adapter-specific metadata
