@@ -85,6 +85,18 @@ defmodule Endo.Adapters.Postgres.Table do
 
         from(query, where: not exists(indexes_query))
 
+      {:with_index_covering, columns}, query ->
+        indexes_query =
+          PgClass.query(subquery: true, collate_indexes: true, index_covers: columns)
+
+        from(query, where: exists(indexes_query))
+
+      {:without_index_covering, columns}, query ->
+        indexes_query =
+          PgClass.query(subquery: true, collate_indexes: true, index_covers: columns)
+
+        from(query, where: not exists(indexes_query))
+
       {field, value}, query ->
         apply_filter(query, field, value)
     end)

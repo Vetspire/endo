@@ -59,6 +59,7 @@ defmodule Endo.Adapters.Postgres.PgClass do
   end
 
   @impl Endo.Queryable
+  # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
   def query(base_query \\ base_query(), filters) do
     Enum.reduce(filters, base_query, fn
       {:subquery, true}, query ->
@@ -91,6 +92,13 @@ defmodule Endo.Adapters.Postgres.PgClass do
 
         from([self: self, pg_attribute: pg_attribute] in Ecto.Query.exclude(query, :select),
           having: ^columns == fragment("ARRAY_AGG(?)", pg_attribute.attname)
+        )
+
+      {:index_covers, column}, query ->
+        columns = (is_list(column) && column) || [column]
+
+        from([self: self, pg_attribute: pg_attribute] in Ecto.Query.exclude(query, :select),
+          having: fragment("? && ARRAY_AGG(?)", ^columns, pg_attribute.attname)
         )
 
       {field, value}, query ->

@@ -292,6 +292,29 @@ defmodule EndoTest do
       refute is_nil(ctx.find.(tables, "orgs"))
     end
 
+    test "lists tables and metadata for all tables having an index covering field", ctx do
+      # Table `accounts_orgs` defines a compound index on `account_id` x `org_id`...
+      assert tables_indexing_org_id = Endo.list_tables(Test.Postgres.Repo, with_index: "org_id")
+
+      # However `with_index` only works on exact matches and thus won't be returned.
+      assert is_nil(ctx.find.(tables_indexing_org_id, "accounts_orgs"))
+
+      # However `with_index_covering` does away with this limitation, and will find tables where a
+      # composite index happens to cover the given column
+      assert tables_covering_org_id =
+               Endo.list_tables(Test.Postgres.Repo, with_index_covering: "org_id")
+
+      refute is_nil(ctx.find.(tables_covering_org_id, "accounts_orgs"))
+
+      # The inverse is also true; `without_index_covering` will find tables where a composite
+      # index does not happen to cover the given column, which we know will be false for the
+      # next test:
+      assert tables_without_index_covering_account_id =
+               Endo.list_tables(Test.Postgres.Repo, without_index_covering: "account_id")
+
+      assert is_nil(ctx.find.(tables_without_index_covering_account_id, "accounts_orgs"))
+    end
+
     test "index metadata contains flags `is_unique` and `is_primary`", ctx do
       assert tables = Endo.list_tables(Test.Postgres.Repo)
 
