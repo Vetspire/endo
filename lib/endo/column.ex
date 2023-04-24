@@ -1,7 +1,21 @@
 defmodule Endo.Column do
   @moduledoc "Column metadata for a given table's columns"
+
   @type t :: %__MODULE__{}
-  defstruct [:adapter, :name, :type, :position, :type_metadata, :default_value]
+
+  defstruct [
+    :adapter,
+    :name,
+    :type,
+    :position,
+    :type_metadata,
+    :default_value,
+    :table_name,
+    :repo,
+    :otp_app,
+    :database,
+    indexes: %Endo.Index.NotLoaded{}
+  ]
 
   defmodule Postgres.Type.Metadata do
     alias Endo.Adapters.Postgres

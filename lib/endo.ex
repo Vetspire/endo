@@ -169,7 +169,7 @@ defmodule Endo do
 
   defp list_tables(Ecto.Adapters.Postgres, repo, filters) do
     for table <- Postgres.list_tables(repo, filters) do
-      Postgres.to_endo(table, repo.config())
+      Postgres.to_endo(table, Keyword.put(repo.config(), :repo, repo))
     end
   end
 
@@ -187,5 +187,13 @@ defmodule Endo do
   """
   @spec load_schemas(Endo.Table.t()) :: Endo.Table.t()
   @spec load_schemas([Endo.Table.t()]) :: [Endo.Table.t()]
-  defdelegate load_schemas(endo_table_or_tables), to: Endo.Schema, as: :load
+  defdelegate load_schemas(entity), to: Endo.Schema, as: :load
+
+  @doc """
+  Given Endo Column(s) or Endo Table(s), tries to populate a given `Endo.Column.t()`'s `Endo.Index.NotLoaded.t()`
+  entries.
+  """
+  @spec load_indexes(Endo.Table.t() | Endo.Column.t()) :: Endo.Table.t() | Endo.Column.t()
+  @spec load_indexes([Endo.Table.t() | Endo.Column.t()]) :: [Endo.Table.t() | Endo.Column.t()]
+  defdelegate load_indexes(entity), to: Endo.Index, as: :load
 end
