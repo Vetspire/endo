@@ -77,10 +77,10 @@ defmodule EndoTest do
       assert Enum.count(schema_migrations.indexes) == 1
       assert Enum.count(schema_migrations.columns) == 2
 
-      assert %Endo.Column{name: "version", type: "bigint"} =
+      assert %Endo.Column{name: "version", type: "int8"} =
                ctx.find.(schema_migrations.columns, "version")
 
-      assert %Endo.Column{name: "inserted_at", type: "timestamp without time zone"} =
+      assert %Endo.Column{name: "inserted_at", type: "timestamp"} =
                ctx.find.(schema_migrations.columns, "inserted_at")
 
       assert %Endo.Index{name: "schema_migrations_pkey"} =
