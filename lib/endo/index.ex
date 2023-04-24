@@ -42,6 +42,42 @@ defmodule Endo.Index do
     []
   end
 
+  def load([%Endo.Column{repo: repo} | _rest] = columns) do
+    unless Enum.all?(columns, &is_struct(&1, Endo.Column)) do
+      raise ArgumentError,
+            "All entities in list must be of type `Endo.Column.t()`. Got: #{inspect(columns)}"
+    end
+
+    tables =
+      columns
+      |> Enum.map(& &1.table_name)
+      |> Enum.uniq()
+      |> then(&Endo.list_tables(repo, table_name: &1))
+      |> load()
+      |> Map.new(&{&1.name, &1})
+
+    Enum.map(columns, fn
+      column when is_struct(column.indexes, NotLoaded) ->
+        Enum.find(tables[column.table_name].columns, &(&1.name == column.name))
+
+      column ->
+        column
+    end)
+  end
+
+  def load(%Endo.Column{table_name: table_name, repo: repo, indexes: %NotLoaded{}} = column) do
+    %Endo.Table{columns: columns} =
+      repo
+      |> Endo.get_table(table_name)
+      |> load()
+
+    Enum.find(columns, &(&1.name == column.name))
+  end
+
+  def load(%Endo.Column{} = column) do
+    column
+  end
+
   def load([%Endo.Table{} | _rest] = tables) do
     unless Enum.all?(tables, &is_struct(&1, Endo.Table)) do
       raise ArgumentError,
@@ -63,38 +99,11 @@ defmodule Endo.Index do
     %Endo.Table{table | columns: Enum.map(columns, &do_load(&1, index_bag))}
   end
 
-  def load([%Endo.Column{repo: repo} | _rest] = columns) do
-    unless Enum.all?(columns, &is_struct(&1, Endo.Column)) do
-      raise ArgumentError,
-            "All entities in list must be of type `Endo.Column.t()`. Got: #{inspect(columns)}"
-    end
-
-    tables =
-      columns
-      |> Enum.map(& &1.table_name)
-      |> Enum.uniq()
-      |> then(&Endo.list_tables(repo, table_name: &1))
-      |> load()
-      |> Map.new(&{&1.name, &1})
-
-    Enum.map(columns, fn column ->
-      Enum.find(tables[column.table_name].columns, &(&1.name == column.name))
-    end)
-  end
-
-  def load(%Endo.Column{table_name: table_name, repo: repo} = column) do
-    %Endo.Table{columns: columns} =
-      repo
-      |> Endo.get_table(table_name)
-      |> load()
-
-    Enum.find(columns, &(&1.name == column.name))
-  end
-
   defp do_load(%Endo.Column{indexes: %NotLoaded{}} = column, index_bag) do
     %Endo.Column{column | indexes: ETS.get(index_bag, column.name, [])}
   end
 
+  # coveralls-ignore-start
   defp do_load(%Endo.Column{} = column, _index_bag) do
     column
   end

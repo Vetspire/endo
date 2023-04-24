@@ -5,6 +5,6 @@ defmodule Endo.Adapter do
   """
 
   @callback list_tables(repo :: module(), filters :: Keyword.t()) :: [map()]
-  @callback to_endo(data :: map()) ::
+  @callback to_endo(data :: map(), opts :: Keyword.t()) ::
               Endo.Table.t() | Endo.Column.t() | Endo.Association.t() | Endo.Index.t()
 end

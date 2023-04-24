@@ -386,6 +386,149 @@ defmodule EndoTest do
     end
   end
 
+  describe "load_indexes/1" do
+    test "given an empty list, returns empty list" do
+      assert [] = Endo.load_indexes([])
+    end
+
+    test "given a list that contains data other than Endo Tables, raises" do
+      assert_raise(ArgumentError, fn -> Endo.load_indexes([%Endo.Table{}, 123]) end)
+    end
+
+    test "given a list that contains data other than Endo Columns, raises" do
+      assert_raise(ArgumentError, fn -> Endo.load_indexes([%Endo.Column{}, 123]) end)
+    end
+
+    test "given a list of tables, fetches all indexes for each column", ctx do
+      raw_tables = Endo.list_tables(Test.Postgres.Repo)
+
+      for table <- raw_tables, column <- table.columns do
+        assert is_struct(column.indexes, Endo.Index.NotLoaded)
+      end
+
+      tables = Endo.load_indexes(raw_tables)
+
+      for table <- tables, column <- table.columns do
+        assert is_list(column.indexes)
+      end
+
+      assert %Endo.Table{} = accounts = ctx.find.(tables, "accounts")
+
+      assert %Endo.Column{
+               indexes: [%Endo.Index{is_unique: true, name: "accounts_username_index"}]
+             } = Enum.find(accounts.columns, &(&1.name == "username"))
+
+      assert %Endo.Column{indexes: [%Endo.Index{is_unique: true, name: "accounts_email_index"}]} =
+               Enum.find(accounts.columns, &(&1.name == "email"))
+
+      assert %Endo.Column{
+               indexes: [%Endo.Index{is_unique: false, name: "accounts_inserted_at_index"}]
+             } = Enum.find(accounts.columns, &(&1.name == "inserted_at"))
+
+      assert %Endo.Column{
+               indexes: [%Endo.Index{is_unique: false, name: "accounts_updated_at_index"}]
+             } = Enum.find(accounts.columns, &(&1.name == "updated_at"))
+
+      assert %Endo.Table{} = repos = ctx.find.(tables, "repos")
+
+      assert %Endo.Column{
+               indexes: [
+                 %Endo.Index{is_unique: true, name: "repos_account_id_name_index"} =
+                   repos_account_id_name_index
+               ]
+             } = Enum.find(repos.columns, &(&1.name == "account_id"))
+
+      assert %Endo.Column{indexes: [^repos_account_id_name_index]} =
+               Enum.find(repos.columns, &(&1.name == "name"))
+
+      assert %Endo.Column{indexes: []} = Enum.find(repos.columns, &(&1.name == "some_interval"))
+    end
+
+    test "given a single table, fetches all indexes for each column" do
+      repos = Endo.get_table(Test.Postgres.Repo, "repos")
+
+      for column <- repos.columns do
+        assert is_struct(column.indexes, Endo.Index.NotLoaded)
+      end
+
+      repos = Endo.load_indexes(repos)
+
+      for column <- repos.columns do
+        assert is_list(column.indexes)
+      end
+
+      assert %Endo.Column{
+               indexes: [
+                 %Endo.Index{is_unique: true, name: "repos_account_id_name_index"} =
+                   repos_account_id_name_index
+               ]
+             } = Enum.find(repos.columns, &(&1.name == "account_id"))
+
+      assert %Endo.Column{indexes: [^repos_account_id_name_index]} =
+               Enum.find(repos.columns, &(&1.name == "name"))
+
+      assert %Endo.Column{indexes: []} = Enum.find(repos.columns, &(&1.name == "some_interval"))
+    end
+
+    test "given a list of columns, fetches all indexes for each column" do
+      repos = Endo.get_table(Test.Postgres.Repo, "repos")
+
+      for column <- repos.columns do
+        assert is_struct(column.indexes, Endo.Index.NotLoaded)
+      end
+
+      columns = Endo.load_indexes(repos.columns)
+
+      for column <- columns do
+        assert is_list(column.indexes)
+      end
+
+      assert %Endo.Column{
+               indexes: [
+                 %Endo.Index{is_unique: true, name: "repos_account_id_name_index"} =
+                   repos_account_id_name_index
+               ]
+             } = Enum.find(columns, &(&1.name == "account_id"))
+
+      assert %Endo.Column{indexes: [^repos_account_id_name_index]} =
+               Enum.find(columns, &(&1.name == "name"))
+
+      assert %Endo.Column{indexes: []} = Enum.find(columns, &(&1.name == "some_interval"))
+    end
+
+    test "given a single column, fetches all indexes for each column" do
+      repos = Endo.get_table(Test.Postgres.Repo, "repos")
+
+      for column <- repos.columns do
+        assert is_struct(column.indexes, Endo.Index.NotLoaded)
+      end
+
+      assert %Endo.Column{
+               indexes: [%Endo.Index{is_unique: true, name: "repos_account_id_name_index"}]
+             } = Endo.load_indexes(Enum.find(repos.columns, &(&1.name == "account_id")))
+    end
+
+    test "idempotent when called multiple times" do
+      repos = Endo.get_table(Test.Postgres.Repo, "repos")
+
+      for column <- repos.columns do
+        assert is_struct(column.indexes, Endo.Index.NotLoaded)
+      end
+
+      assert loaded_example =
+               Endo.load_indexes(Enum.find(repos.columns, &(&1.name == "account_id")))
+
+      assert %Endo.Column{
+               indexes: [%Endo.Index{is_unique: true, name: "repos_account_id_name_index"}]
+             } = loaded_example
+
+      altered_example = %{loaded_example | indexes: [1, 2, 3, 4, 5, 6]}
+
+      assert %{indexes: [1, 2, 3, 4, 5, 6]} = Endo.load_indexes(altered_example)
+      assert [%{indexes: [1, 2, 3, 4, 5, 6]}] = Endo.load_indexes([altered_example])
+    end
+  end
+
   describe "load_tables/1" do
     test "given a list that contains data other than Endo Tables, raises" do
       assert_raise(ArgumentError, fn -> Endo.load_schemas([%Endo.Table{}, 123]) end)
