@@ -19,6 +19,7 @@ defmodule Endo.Adapters.Postgres do
   alias Endo.Adapters.Postgres.Size
   alias Endo.Adapters.Postgres.Table
   alias Endo.Adapters.Postgres.TableConstraint
+  alias Endo.Column.Postgres.Type
 
   @spec list_tables(repo :: module(), opts :: Keyword.t()) :: [Table.t()]
   def list_tables(repo, opts \\ []) when is_atom(repo) do
@@ -55,8 +56,8 @@ defmodule Endo.Adapters.Postgres do
     %Endo.Table{
       adapter: __MODULE__,
       name: table.table_name,
-      columns: Enum.map(table.columns, &to_endo/1),
       indexes: Enum.map(table.indexes, &to_endo/1),
+      columns: table.columns |> Enum.map(&to_endo/1) |> Enum.sort_by(& &1.position),
       schemas: %Endo.Schema.NotLoaded{
         table: table.table_name,
         otp_app: Keyword.get(config, :otp_app)
@@ -73,7 +74,10 @@ defmodule Endo.Adapters.Postgres do
     %Endo.Column{
       adapter: __MODULE__,
       name: column.column_name,
-      type: column.data_type
+      position: column.ordinal_position,
+      default_value: column.column_default,
+      type: column.data_type,
+      type_metadata: Type.Metadata.derive!(column)
     }
   end
 

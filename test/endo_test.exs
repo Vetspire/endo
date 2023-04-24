@@ -354,6 +354,36 @@ defmodule EndoTest do
         assert value =~ "bytes" or value =~ "kB"
       end
     end
+
+    test "colum type metadata is returned alongside tables" do
+      assert %Endo.Table{columns: columns} = Endo.get_table(Test.Postgres.Repo, "repos")
+
+      assert %Endo.Column{
+               type_metadata: %Endo.Column.Postgres.Type.Metadata.Character{
+                 character_length: 255,
+                 octet_length: 1020
+               }
+             } = Enum.find(columns, &(&1.name == "description"))
+
+      assert %Endo.Column{
+               type_metadata: %Endo.Column.Postgres.Type.Metadata.Numeric{
+                 precision: 64,
+                 radix: 2,
+                 scale: 0
+               }
+             } = Enum.find(columns, &(&1.name == "id"))
+
+      assert %Endo.Column{
+               type_metadata: %Endo.Column.Postgres.Type.Metadata.DateTime{precision: 0}
+             } = Enum.find(columns, &(&1.name == "inserted_at"))
+
+      assert %Endo.Column{
+               type_metadata: %Endo.Column.Postgres.Type.Metadata.Interval{
+                 type: "MINUTE TO SECOND",
+                 precision: 6
+               }
+             } = Enum.find(columns, &(&1.name == "some_interval"))
+    end
   end
 
   describe "load_tables/1" do
