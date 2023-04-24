@@ -50,8 +50,6 @@ defmodule Endo.Adapters.Postgres do
   @spec to_endo(Column.t(), Keyword.t()) :: Endo.Column.t()
   @spec to_endo(Index.t(), Keyword.t()) :: Endo.Index.t()
 
-  def to_endo(entity, config \\ [])
-
   def to_endo(%Table{} = table, config) do
     %Endo.Table{
       adapter: __MODULE__,
