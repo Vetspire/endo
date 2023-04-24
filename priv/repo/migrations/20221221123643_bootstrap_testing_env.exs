@@ -33,6 +33,11 @@ defmodule Test.Postgres.Repo.Migrations.BootstrapTestingEnv do
     end
 
     create(unique_index(:repos, [:account_id, :name]))
+
+    execute("""
+      ALTER TABLE repos
+      ADD COLUMN some_interval INTERVAL MINUTE TO SECOND;
+    """)
   end
 
   defp create_orgs do
