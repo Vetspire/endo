@@ -76,7 +76,7 @@ defmodule Endo.Adapters.Postgres do
       name: column.column_name,
       position: column.ordinal_position,
       default_value: column.column_default,
-      type: column.data_type,
+      type: column.udt_name,
       type_metadata: Type.Metadata.derive!(column)
     }
   end
