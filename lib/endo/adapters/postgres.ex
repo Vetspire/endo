@@ -56,8 +56,8 @@ defmodule Endo.Adapters.Postgres do
     %Endo.Table{
       adapter: __MODULE__,
       name: table.table_name,
-      indexes: Enum.map(table.indexes, &to_endo/1),
-      columns: table.columns |> Enum.map(&to_endo/1) |> Enum.sort_by(& &1.position),
+      indexes: Enum.map(table.indexes, &to_endo(&1, config)),
+      columns: table.columns |> Enum.map(&to_endo(&1, config)) |> Enum.sort_by(& &1.position),
       schemas: %Endo.Schema.NotLoaded{
         table: table.table_name,
         otp_app: Keyword.get(config, :otp_app)
@@ -65,15 +65,19 @@ defmodule Endo.Adapters.Postgres do
       associations:
         table.table_constraints
         |> Enum.filter(&(&1.constraint_type == "FOREIGN KEY"))
-        |> Enum.map(&to_endo/1),
+        |> Enum.map(&to_endo(&1, config)),
       metadata: Metadata.derive!(table)
     }
   end
 
-  def to_endo(%Column{} = column, _config) do
+  def to_endo(%Column{} = column, config) do
     %Endo.Column{
       adapter: __MODULE__,
+      database: config[:database],
+      otp_app: config[:otp_app],
+      repo: config[:repo],
       name: column.column_name,
+      table_name: column.table_name,
       position: column.ordinal_position,
       default_value: column.column_default,
       type: column.udt_name,
@@ -81,9 +85,12 @@ defmodule Endo.Adapters.Postgres do
     }
   end
 
-  def to_endo(%TableConstraint{} = constraint, _config) do
+  def to_endo(%TableConstraint{} = constraint, config) do
     %Endo.Association{
       adapter: __MODULE__,
+      database: config[:database],
+      otp_app: config[:otp_app],
+      repo: config[:repo],
       name: constraint.constraint_name,
       type: constraint.constraint_column_usage.table_name,
       from_table_name: constraint.key_column_usage.table_name,
@@ -93,11 +100,14 @@ defmodule Endo.Adapters.Postgres do
     }
   end
 
-  def to_endo(%Index{} = index, _config) do
+  def to_endo(%Index{} = index, config) do
     metadata = index.pg_index || %PgIndex{}
 
     %Endo.Index{
       adapter: __MODULE__,
+      database: config[:database],
+      otp_app: config[:otp_app],
+      repo: config[:repo],
       name: index.name,
       columns: index.columns,
       is_primary: metadata.indisprimary,

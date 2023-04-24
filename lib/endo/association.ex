@@ -8,6 +8,9 @@ defmodule Endo.Association do
     :from_table_name,
     :to_table_name,
     :from_column_name,
-    :to_column_name
+    :to_column_name,
+    :repo,
+    :otp_app,
+    :database
   ]
 end
