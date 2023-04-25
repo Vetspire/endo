@@ -10,6 +10,7 @@ defmodule Endo.Index do
   end
 
   @type t :: %__MODULE__{}
+  @default_load_timeout :timer.seconds(15)
 
   defstruct [
     :adapter,
@@ -35,14 +36,23 @@ defmodule Endo.Index do
   performance, it will be more optimal to pass in `Endo.Table.t()` structs if possible.
 
   Will raise an error if given a mixed list of `Endo.Column.t()`s and `Endo.Table.t()`s.
+
+  Takes an optional `Keyword.t()` of options:
+    - `timeout` which is an integer representing the number of milliseconds before which loading should be aborted.
+      This is only really a consideration for loading indexes across multiple tables and does not apply otherwise.
+      Defaults to `:timer.seconds(15)`.
+
   """
-  @spec load(Endo.Table.t() | Endo.Column.t()) :: Endo.Table.t() | Endo.Column.t()
-  @spec load([Endo.Table.t() | Endo.Column.t()]) :: [Endo.Table.t() | Endo.Column.t()]
-  def load([]) do
+  @spec load(Endo.Table.t() | Endo.Column.t(), opts :: Keyword.t()) ::
+          Endo.Table.t() | Endo.Column.t()
+  @spec load([Endo.Table.t() | Endo.Column.t()], opts :: Keyword.t()) :: [
+          Endo.Table.t() | Endo.Column.t()
+        ]
+  def load([], _opts) do
     []
   end
 
-  def load([%Endo.Column{repo: repo} | _rest] = columns) do
+  def load([%Endo.Column{repo: repo} | _rest] = columns, opts) do
     unless Enum.all?(columns, &is_struct(&1, Endo.Column)) do
       raise ArgumentError,
             "All entities in the list must be of type `Endo.Column.t()`. Got: #{inspect(columns)}"
@@ -53,7 +63,7 @@ defmodule Endo.Index do
       |> Enum.map(& &1.table_name)
       |> Enum.uniq()
       |> then(&Endo.list_tables(repo, table_name: &1))
-      |> load()
+      |> load(opts)
       |> Map.new(&{&1.name, &1})
 
     Enum.map(columns, fn
@@ -65,31 +75,33 @@ defmodule Endo.Index do
     end)
   end
 
-  def load(%Endo.Column{table_name: table_name, repo: repo, indexes: %NotLoaded{}} = column) do
+  def load(%Endo.Column{table_name: table, repo: repo, indexes: %NotLoaded{}} = column, opts) do
     %Endo.Table{columns: columns} =
       repo
-      |> Endo.get_table(table_name)
-      |> load()
+      |> Endo.get_table(table)
+      |> load(opts)
 
     Enum.find(columns, &(&1.name == column.name))
   end
 
-  def load(%Endo.Column{} = column) do
+  def load(%Endo.Column{} = column, _opts) do
     column
   end
 
-  def load([%Endo.Table{} | _rest] = tables) do
+  def load([%Endo.Table{} | _rest] = tables, opts) do
     unless Enum.all?(tables, &is_struct(&1, Endo.Table)) do
       raise ArgumentError,
             "All entities in list must be of type `Endo.Table.t()`. Got: #{inspect(tables)}"
     end
 
+    timeout = Keyword.get(opts, :timeout, @default_load_timeout)
+
     tables
-    |> Task.async_stream(&load/1, ordered: true, max_timeout: :timer.seconds(15))
+    |> Task.async_stream(&load(&1, opts), ordered: true, max_timeout: timeout)
     |> Enum.map(fn {:ok, resp} -> resp end)
   end
 
-  def load(%Endo.Table{columns: columns, indexes: indexes} = table) do
+  def load(%Endo.Table{columns: columns, indexes: indexes} = table, _opts) do
     index_bag = ETS.new(:duplicate_bag)
 
     for index <- indexes, column <- index.columns do
