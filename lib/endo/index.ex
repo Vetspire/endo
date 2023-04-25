@@ -31,7 +31,7 @@ defmodule Endo.Index do
     - A single `Endo.Column.t()`
     - A list of `Endo.Column.t()`s
 
-  Please note that given `Endo.Column.t()` structs, additional `Endo` lookups are neccessary. Thus, for best
+  Please note that given `Endo.Column.t()` structs, additional `Endo` lookups are necessary. Thus, for the best
   performance, it will be more optimal to pass in `Endo.Table.t()` structs if possible.
 
   Will raise an error if given a mixed list of `Endo.Column.t()`s and `Endo.Table.t()`s.
@@ -45,7 +45,7 @@ defmodule Endo.Index do
   def load([%Endo.Column{repo: repo} | _rest] = columns) do
     unless Enum.all?(columns, &is_struct(&1, Endo.Column)) do
       raise ArgumentError,
-            "All entities in list must be of type `Endo.Column.t()`. Got: #{inspect(columns)}"
+            "All entities in the list must be of type `Endo.Column.t()`. Got: #{inspect(columns)}"
     end
 
     tables =
