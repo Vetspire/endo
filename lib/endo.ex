@@ -194,8 +194,13 @@ defmodule Endo do
   @doc """
   Given Endo Column(s) or Endo Table(s), tries to populate a given `Endo.Column.t()`'s `Endo.Index.NotLoaded.t()`
   entries.
+
+  See `Endo.Index.load/2` for more information.
   """
-  @spec load_indexes(Endo.Table.t() | Endo.Column.t()) :: Endo.Table.t() | Endo.Column.t()
-  @spec load_indexes([Endo.Table.t() | Endo.Column.t()]) :: [Endo.Table.t() | Endo.Column.t()]
-  defdelegate load_indexes(entity), to: Endo.Index, as: :load
+  @spec load_indexes(Endo.Table.t() | Endo.Column.t(), Keyword.t()) ::
+          Endo.Table.t() | Endo.Column.t()
+  @spec load_indexes([Endo.Table.t() | Endo.Column.t()], Keyword.t()) :: [
+          Endo.Table.t() | Endo.Column.t()
+        ]
+  defdelegate load_indexes(entity, opts \\ []), to: Endo.Index, as: :load
 end
