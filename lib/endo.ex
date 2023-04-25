@@ -168,8 +168,10 @@ defmodule Endo do
   end
 
   defp list_tables(Ecto.Adapters.Postgres, repo, filters) do
+    opts = Keyword.put(repo.config(), :repo, repo)
+
     for table <- Postgres.list_tables(repo, filters) do
-      Postgres.to_endo(table, Keyword.put(repo.config(), :repo, repo))
+      Postgres.to_endo(table, opts)
     end
   end
 
