@@ -15,21 +15,24 @@ defmodule Endo.Adapters.Postgres.Metadata do
   end
 
   def derive!(%Table{pg_class: pg_class, size: size}) do
+    pg_class = (is_map(pg_class) && pg_class) || %{}
+    size = (is_map(size) && size) || %{}
+
     %Endo.Metadata.Postgres{
       replica_identity: replica_identity(pg_class),
       kind: kind(pg_class),
-      has_triggers: pg_class.relhastriggers,
-      is_populated: pg_class.relispopulated,
-      is_partitioned: pg_class.relispartition,
+      has_triggers: Map.get(pg_class, :relhastriggers),
+      is_populated: Map.get(pg_class, :relispopulated),
+      is_partitioned: Map.get(pg_class, :relispartition),
       pg_class: pg_class,
-      table_size: size.table_size,
-      relation_size: size.relation_size,
-      toast_size: size.toast_size,
-      index_size: size.index_size,
-      table_size_pretty: size.table_size_pretty,
-      relation_size_pretty: size.relation_size_pretty,
-      toast_size_pretty: size.toast_size_pretty,
-      index_size_pretty: size.index_size_pretty
+      table_size: Map.get(size, :table_size),
+      relation_size: Map.get(size, :relation_size),
+      toast_size: Map.get(size, :toast_size),
+      index_size: Map.get(size, :index_size),
+      table_size_pretty: Map.get(size, :table_size_pretty),
+      relation_size_pretty: Map.get(size, :relation_size_pretty),
+      toast_size_pretty: Map.get(size, :toast_size_pretty),
+      index_size_pretty: Map.get(size, :index_size_pretty)
     }
   end
 
