@@ -27,8 +27,10 @@ defmodule Endo.Schema do
   """
   def load([%Endo.Table{} | _rest] = endo_tables) do
     unless Enum.all?(endo_tables, &is_struct(&1, Endo.Table)) do
+      endo_tables = inspect(endo_tables)
+
       raise ArgumentError,
-            "All entities in list must be of type `Endo.Table.t()`. Got: #{inspect(endo_tables)}"
+        message: "All entities in list must be of type `Endo.Table.t()`. Got: #{endo_tables}"
     end
 
     {unloaded_endo_tables, loaded_endo_tables} =
