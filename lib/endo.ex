@@ -160,8 +160,10 @@ defmodule Endo do
   @spec list_tables(repo :: module(), filters :: Keyword.t()) :: [Endo.Table.t()]
   def list_tables(repo, filters \\ []) do
     unless function_exported?(repo, :__adapter__, 0) do
+      repo = inspect(repo)
+
       raise ArgumentError,
-        message: "Expected a module that `use`-es `Ecto.Repo`, got: `#{inspect(repo)}`"
+        message: "Expected a module that `use`-es `Ecto.Repo`, got: `#{repo}`"
     end
 
     list_tables(repo.__adapter__(), repo, filters)
@@ -176,10 +178,12 @@ defmodule Endo do
   end
 
   defp list_tables(adapter, _repo, _filters) do
+    adapter = inspect(adapter)
+
     raise ArgumentError,
       message: """
       Unsupported adapter given. Supported adapters are currently: [Ecto.Adapters.Postgres].
-      Given: #{inspect(adapter)}
+      Given: #{adapter}
       """
   end
 

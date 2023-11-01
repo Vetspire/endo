@@ -54,8 +54,10 @@ defmodule Endo.Index do
 
   def load([%Endo.Column{repo: repo} | _rest] = columns, opts) do
     unless Enum.all?(columns, &is_struct(&1, Endo.Column)) do
+      columns = inspect(columns)
+
       raise ArgumentError,
-            "All entities in the list must be of type `Endo.Column.t()`. Got: #{inspect(columns)}"
+        message: "All entities in the list must be of type `Endo.Column.t()`. Got: #{columns}"
     end
 
     tables =
@@ -90,8 +92,10 @@ defmodule Endo.Index do
 
   def load([%Endo.Table{} | _rest] = tables, opts) do
     unless Enum.all?(tables, &is_struct(&1, Endo.Table)) do
+      tables = inspect(tables)
+
       raise ArgumentError,
-            "All entities in list must be of type `Endo.Table.t()`. Got: #{inspect(tables)}"
+        message: "All entities in list must be of type `Endo.Table.t()`. Got: #{tables}"
     end
 
     timeout = Keyword.get(opts, :timeout, @default_load_timeout)
