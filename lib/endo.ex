@@ -103,6 +103,15 @@ defmodule Endo do
   # Ordering does not matter.
   ```
 
+  Additionally, many filters (such as `table_name`, `with_column`, etc.) can be given a regular expression which
+  will be attempted to be used by the Endo adapter of choice. This enables more complex queries to be performed,
+  such as:
+
+  ```elixir
+  Endo.list_tables(MyApp.Repo, with_column: ~r/(^|_)ID$/i)
+  # Return all tables containing columns that either have a singular `id` column, or a `*_id` column.
+  ```
+
   ## Adapter-specific metadata
 
   While Endo is designed to be able to adapt and connect to several different database backends, it is known that
