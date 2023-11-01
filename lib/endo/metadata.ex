@@ -7,6 +7,12 @@ defmodule Endo.Metadata do
     defstruct []
   end
 
+  defmodule NotAvailable do
+    @moduledoc false
+    @type t :: %__MODULE__{}
+    defstruct [:table, :adapter, :message]
+  end
+
   defmodule Postgres do
     @moduledoc false
     @type t :: %__MODULE__{}

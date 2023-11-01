@@ -6,6 +6,14 @@ defmodule Endo.Adapters.Postgres.Metadata do
   alias Endo.Adapters.Postgres.Table
 
   @spec derive!(Table.t()) :: Endo.Metadata.Postgres.t()
+  def derive!(%Table{pg_class: nil} = table) do
+    %Endo.Metadata.NotAvailable{
+      table: table.table_name,
+      adapter: Endo.Adapters.Postgres,
+      message: "Could not find `pg_class` for table."
+    }
+  end
+
   def derive!(%Table{pg_class: pg_class, size: size}) do
     %Endo.Metadata.Postgres{
       replica_identity: replica_identity(pg_class),
@@ -29,7 +37,7 @@ defmodule Endo.Adapters.Postgres.Metadata do
   defp replica_identity(%PgClass{relreplident: "n"}), do: "NOTHING"
   defp replica_identity(%PgClass{relreplident: "f"}), do: "FULL"
   defp replica_identity(%PgClass{relreplident: "i"}), do: "INDEX"
-  defp replica_identity(%PgClass{relreplident: _}), do: nil
+  defp replica_identity(_otherwise), do: nil
 
   defp kind(%PgClass{relkind: "r"}), do: "ordinary table"
   defp kind(%PgClass{relkind: "i"}), do: "index"
@@ -41,5 +49,5 @@ defmodule Endo.Adapters.Postgres.Metadata do
   defp kind(%PgClass{relkind: "f"}), do: "foreign table"
   defp kind(%PgClass{relkind: "p"}), do: "partitioned table"
   defp kind(%PgClass{relkind: "I"}), do: "partitioned index"
-  defp kind(%PgClass{relkind: _}), do: nil
+  defp kind(_otherwise), do: nil
 end
