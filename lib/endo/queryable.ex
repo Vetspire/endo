@@ -58,6 +58,14 @@ defmodule Endo.Queryable do
     from(x in query, order_by: [{:desc, ^value}])
   end
 
+  def apply_filter(query, field, %Regex{} = regex) do
+    if String.contains?(regex.opts, "i") do
+      from(x in query, where: fragment("? ~* ?", field(x, ^field), ^regex.source))
+    else
+      from(x in query, where: fragment("? ~ ?", field(x, ^field), ^regex.source))
+    end
+  end
+
   def apply_filter(query, field, value) when is_list(value) do
     from(x in query, where: field(x, ^field) in ^value)
   end

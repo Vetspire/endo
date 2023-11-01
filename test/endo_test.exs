@@ -292,6 +292,23 @@ defmodule EndoTest do
       refute is_nil(ctx.find.(tables, "orgs"))
     end
 
+    test "lists tables and metadata with given table name filters (simple regex)" do
+      assert [] = Endo.list_tables(Test.Postgres.Repo, table_name: ~r/Accounts/)
+      assert tables = Endo.list_tables(Test.Postgres.Repo, table_name: ~r/Accounts/i)
+
+      for table <- tables, do: assert(table.name =~ "accounts")
+    end
+
+    test "lists tables and metadata with given column filters (complex regex)" do
+      assert tables = Endo.list_tables(Test.Postgres.Repo, with_column: ~r/(^|_)id/)
+
+      for table <- tables do
+        assert Enum.any?(table.columns, fn column ->
+                 column.name == "id" or column.name =~ "_id"
+               end)
+      end
+    end
+
     test "lists tables and metadata for all tables having an index covering field", ctx do
       # Table `accounts_orgs` defines a compound index on `account_id` x `org_id`...
       assert tables_indexing_org_id = Endo.list_tables(Test.Postgres.Repo, with_index: "org_id")
