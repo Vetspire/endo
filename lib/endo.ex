@@ -144,6 +144,12 @@ defmodule Endo do
   alias Endo.Adapters.Postgres
 
   @doc """
+  Returns the default table schema used by Endo if not otherwise specified.
+  """
+  @spec table_schema :: String.t()
+  def table_schema, do: Application.get_env(:endo, :table_schema, "public")
+
+  @doc """
   Given an Ecto Repo and a table name, tries to return an Endo Table or nil if said table does
   not exist.
 
