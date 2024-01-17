@@ -1,6 +1,6 @@
 import Config
 
-config :endo, ecto_repos: [Test.Postgres.Repo]
+config :endo, ecto_repos: [Test.Postgres.Repo], table_schema: "public"
 
 config :endo, Test.Postgres.Repo,
   database: System.fetch_env!("POSTGRES_DB"),
