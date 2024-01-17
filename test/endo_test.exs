@@ -63,7 +63,8 @@ defmodule EndoTest do
 
   describe "get_table/3 (Postgres)" do
     test "given valid table name and repo, returns Endo Table" do
-      assert %Endo.Table{name: "orgs"} = Endo.get_table(Test.Postgres.Repo, "orgs")
+      assert %Endo.Table{name: "orgs", schema: "public"} =
+               Endo.get_table(Test.Postgres.Repo, "orgs")
     end
 
     test "given invalid table name, but valid repo, returns nil" do
@@ -79,7 +80,7 @@ defmodule EndoTest do
     end
 
     test "returns table belonging to non-default prefix if specified correctly" do
-      assert %Endo.Table{name: "events"} =
+      assert %Endo.Table{name: "events", schema: "debug"} =
                Endo.get_table(Test.Postgres.Repo, "events", prefix: "debug")
     end
   end
