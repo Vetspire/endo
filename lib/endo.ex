@@ -139,6 +139,29 @@ defmodule Endo do
 
   As features get built out, we make no hard guarantees of keeping the `metadata` field stable, but efforts will
   of course be taken to mitigate unnecessary breaking changes from occuring.
+
+  ## Setting schema prefixes / table schemas
+
+  By default, Endo will assume that your application's tables are stored in the `public` schema. This is the
+  default schema for Postgres, but it is possible to change this by setting the `:table_schema` config option
+  in your application's config like so:
+
+  ```elixir
+  config :endo, table_schema: "custom_schema"
+  ```
+
+  If set this way, Endo will use the given schema as the default schema for all queries. This can be overridden
+  on a per-query basis by passing the `:prefix` option to `Endo.list_tables/2` or `Endo.get_table/3` mimicing
+  the behavior of the `:prefix` option in `Ecto`:
+
+  ```elixir
+  [%Endo.Table{}, ...] = Endo.list_tables(MyApp.Repo, prefix: "custom_schema")
+  %Endo.Table{} = Endo.get_table(MyApp.Repo, "special_table", prefix: "custom_schema")
+  ```
+
+  Additionally, Endo will display the table schema of any given table via `%Endo.Table{schema: schema}`.
+
+  For runtime debugging, you can use the `Endo.table_schema/0` function to retrieve the current default schema.
   """
 
   alias Endo.Adapters.Postgres
