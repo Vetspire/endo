@@ -6,6 +6,19 @@ defmodule EndoTest do
     {:ok, find: fn tables, name -> Enum.find(tables, &(&1.name == name)) end}
   end
 
+  describe "table_schema/0" do
+    test "returns specified table schema" do
+      # If configured, return the configured value
+      assert :ok = Application.put_env(:endo, :table_schema, "a_custom_schema_prefix")
+      assert "a_custom_schema_prefix" = Endo.table_schema()
+
+      # TODO: Otherwise fall back to "public" which is the default in Postgres at least --
+      #       might need to investigate how we go about supporting this for future adapters.
+      assert :ok = Application.delete_env(:endo, :table_schema)
+      assert "public" = Endo.table_schema()
+    end
+  end
+
   describe "list_tables/2" do
     test "returns error when given non-ecto repo" do
       assert_raise(
