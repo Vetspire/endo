@@ -5,6 +5,20 @@ defmodule Test.Postgres.Repo.Migrations.BootstrapTestingEnv do
     create_accounts()
     create_repos()
     create_orgs()
+    create_prefix_table()
+  end
+
+  def create_prefix_table do
+    execute("CREATE SCHEMA debug")
+
+    flush()
+
+    create table(:events, prefix: "debug") do
+      add(:type, :string, null: false)
+      add(:data, :map, null: false)
+
+      timestamps()
+    end
   end
 
   defp create_accounts do

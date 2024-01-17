@@ -58,9 +58,7 @@ defmodule Endo.Adapters.Postgres.Table do
 
   @impl Endo.Queryable
   def query(base_query \\ base_query(), filters) do
-    filters
-    |> Keyword.put_new(:prefix, Endo.table_schema())
-    |> Enum.reduce(base_query, fn
+    Enum.reduce(filters, base_query, fn
       {:prefix, prefix}, query when is_binary(prefix) ->
         from(x in query, where: x.table_schema == ^prefix)
 

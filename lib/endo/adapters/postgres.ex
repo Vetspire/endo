@@ -23,12 +23,13 @@ defmodule Endo.Adapters.Postgres do
 
   @spec list_tables(repo :: module(), opts :: Keyword.t()) :: [Table.t()]
   def list_tables(repo, opts \\ []) when is_atom(repo) do
+    opts = Keyword.put_new(opts, :prefix, Endo.table_schema())
     preloads = [:columns, table_constraints: [:key_column_usage, :constraint_column_usage]]
 
     derive_preloads = fn %Table{table_name: name} = table ->
       indexes = PgClass.query(collate_indexes: true, relname: name)
       metadata = PgClass.query(relname: name, relkind: ~w(r t m f p))
-      size = Size.query(relname: name)
+      size = Size.query(relname: name, prefix: opts[:prefix])
 
       %Table{
         table
