@@ -49,6 +49,7 @@ defmodule Endo.Adapters.Postgres.Table do
     field(:indexes, :map, virtual: true)
     field(:pg_class, :map, virtual: true)
     field(:size, :map, virtual: true)
+    field(:schema, :string, virtual: true)
   end
 
   @impl Endo.Queryable

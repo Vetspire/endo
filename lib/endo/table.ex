@@ -4,6 +4,7 @@ defmodule Endo.Table do
   defstruct [
     :adapter,
     :name,
+    :schema,
     columns: [],
     associations: [],
     indexes: [],

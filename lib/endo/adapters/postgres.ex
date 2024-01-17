@@ -33,7 +33,8 @@ defmodule Endo.Adapters.Postgres do
 
       %Table{
         table
-        | size: repo.one(size),
+        | schema: opts[:prefix],
+          size: repo.one(size),
           pg_class: repo.one(metadata),
           indexes: repo.all(indexes)
       }
@@ -54,6 +55,7 @@ defmodule Endo.Adapters.Postgres do
   def to_endo(%Table{} = table, config) do
     %Endo.Table{
       adapter: __MODULE__,
+      schema: table.schema,
       name: table.table_name,
       indexes: Enum.map(table.indexes, &to_endo(&1, config)),
       columns: table.columns |> Enum.map(&to_endo(&1, config)) |> Enum.sort_by(& &1.position),
