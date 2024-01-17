@@ -34,6 +34,10 @@ defmodule Endo.Queryable do
   @callback query(base_query :: Ecto.Queryable.t(), Keyword.t()) :: Ecto.Queryable.t()
 
   @spec apply_filter(Ecto.Queryable.t(), field :: atom(), value :: any()) :: Ecto.Queryable.t()
+  def apply_filter(query, :prefix, value) do
+    from(x in query, prefix: ^value)
+  end
+
   def apply_filter(query, :preload, value) do
     from(x in query, preload: ^value)
   end

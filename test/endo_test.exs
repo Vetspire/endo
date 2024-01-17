@@ -69,6 +69,19 @@ defmodule EndoTest do
     test "given invalid table name, but valid repo, returns nil" do
       assert is_nil(Endo.get_table(Test.Postgres.Repo, "passports"))
     end
+
+    test "returns nothing when querying table belonging to non-default prefix when not specified" do
+      assert is_nil(Endo.get_table(Test.Postgres.Repo, "events"))
+    end
+
+    test "returns nothing when querying table belonging to incorrectly specified prefix" do
+      assert is_nil(Endo.get_table(Test.Postgres.Repo, "events", prefix: "something_random"))
+    end
+
+    test "returns table belonging to non-default prefix if specified correctly" do
+      assert %Endo.Table{name: "events"} =
+               Endo.get_table(Test.Postgres.Repo, "events", prefix: "debug")
+    end
   end
 
   describe "list_tables/2 (Postgres)" do

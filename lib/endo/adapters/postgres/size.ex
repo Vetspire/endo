@@ -3,8 +3,10 @@ defmodule Endo.Adapters.Postgres.Size do
 
   import Ecto.Query
 
-  @spec query([{:relname, String.t()}]) :: Ecto.Queryable.t()
-  def query(relname: relname) do
+  @spec query([{:relname, String.t()}, {:prefix, String.t()}]) :: Ecto.Queryable.t()
+  def query(opts) do
+    relname = Enum.join([opts[:prefix], opts[:relname]], ".")
+
     select(
       with_cte("virtual_table", "virtual_table",
         as:
