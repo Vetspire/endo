@@ -42,8 +42,8 @@ defmodule Endo.Adapters.Postgres do
 
     opts
     |> Table.query()
-    |> repo.all()
-    |> Task.async_stream(&(&1 |> repo.preload(preloads) |> derive_preloads.()))
+    |> repo.all(timeout: :timer.minutes(2))
+    |> Task.async_stream(&(&1 |> repo.preload(preloads) |> derive_preloads.()), timeout: :timer.minutes(2))
     |> Enum.map(fn {:ok, %Table{} = table} -> table end)
   end
 
