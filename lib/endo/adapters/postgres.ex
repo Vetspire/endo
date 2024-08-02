@@ -22,7 +22,7 @@ defmodule Endo.Adapters.Postgres do
   alias Endo.Column.Postgres.Type
 
   @spec list_tables(repo :: module(), opts :: Keyword.t()) :: [Table.t()]
-  def list_tables(repo, opts \\ [timeout: :timer.minutes(2)]) when is_atom(repo) do
+  def list_tables(repo, opts \\ []) when is_atom(repo) do
     opts = Keyword.put_new(opts, :prefix, Endo.table_schema())
     preloads = [:columns, table_constraints: [:key_column_usage, :constraint_column_usage]]
 
@@ -42,9 +42,9 @@ defmodule Endo.Adapters.Postgres do
 
     opts
     |> Table.query()
-    |> repo.all(timeout: opts[:timeout])
+    |> repo.all(timeout: :timer.minutes(2))
     |> Task.async_stream(&(&1 |> repo.preload(preloads) |> derive_preloads.()),
-      timeout: opts[:timeout]
+      timeout: :timer.minutes(2)
     )
     |> Enum.map(fn {:ok, %Table{} = table} -> table end)
   end
