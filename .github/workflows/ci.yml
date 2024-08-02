@@ -48,6 +48,6 @@ jobs:
           key: ${{ hashFiles('mix.lock') }}-${{ matrix.elixir }}-${{ matrix.otp }}
       - if: steps.mix-cache.outputs.cache-hit != 'true'
         run: mkdir -p priv/plts; mix deps.get; mix deps.compile
-      - run: docker-compose up -d
+      - run: docker compose up -d
       - run: mix lint
       - run: MIX_ENV=test mix do ecto.create, ecto.migrate, test
