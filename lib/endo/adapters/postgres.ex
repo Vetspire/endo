@@ -84,6 +84,7 @@ defmodule Endo.Adapters.Postgres do
       position: column.ordinal_position,
       default_value: column.column_default,
       type: column.udt_name,
+      is_nullable: column.is_nullable == :yes,
       type_metadata: Type.Metadata.derive!(column)
     }
   end

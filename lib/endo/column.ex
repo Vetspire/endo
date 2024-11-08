@@ -8,6 +8,7 @@ defmodule Endo.Column do
     :name,
     :type,
     :position,
+    :is_nullable,
     :type_metadata,
     :default_value,
     :table_name,
