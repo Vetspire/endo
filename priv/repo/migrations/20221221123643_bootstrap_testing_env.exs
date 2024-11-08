@@ -23,8 +23,8 @@ defmodule Test.Postgres.Repo.Migrations.BootstrapTestingEnv do
 
   defp create_accounts do
     create table(:accounts) do
-      add(:username, :string, null: false)
-      add(:email, :string, null: false)
+      add(:username, :string, null: true)
+      add(:email, :string, null: true)
 
       timestamps()
     end
@@ -63,7 +63,7 @@ defmodule Test.Postgres.Repo.Migrations.BootstrapTestingEnv do
 
     create table(:accounts_orgs, primary_key: false) do
       add(:account_id, references(:accounts), null: false)
-      add(:org_id, references(:orgs), null: false)
+      add(:org_id, references(:orgs), null: true)
 
       timestamps()
     end

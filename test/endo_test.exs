@@ -488,6 +488,18 @@ defmodule EndoTest do
       assert %Endo.Column{indexes: []} = Enum.find(repos.columns, &(&1.name == "some_interval"))
     end
 
+    test "given a single table, returns whether columns are nullable" do
+      accounts_orgs = Endo.get_table(Test.Postgres.Repo, "accounts_orgs")
+
+      assert length(accounts_orgs.columns) == 2
+
+      org_id = Enum.find(accounts_orgs.columns, &(&1.name == "org_id"))
+      account_id = Enum.find(accounts_orgs.columns, &(&1.name == "account_id"))
+
+      assert org_id.is_nullable
+      refute account_id.is_nullable
+    end
+
     test "given a single table, fetches all indexes for each column" do
       repos = Endo.get_table(Test.Postgres.Repo, "repos")
 
